@@ -57,8 +57,9 @@ class YtdlpDownloader:
             # If the cookie file is read-only (like in Render secrets), yt-dlp will crash on exit when trying to save cookies.
             # To prevent this, we copy the cookies to a temporary writeable path and pass that instead.
             try:
-                temp_cookie_path = os.path.join(self.root_dir, "temp_cookies.txt")
+                import tempfile
                 import shutil
+                temp_cookie_path = os.path.join(tempfile.gettempdir(), "temp_cookies.txt")
                 shutil.copy2(cookiefile_path, temp_cookie_path)
                 opts["cookiefile"] = temp_cookie_path
             except Exception:
@@ -107,8 +108,9 @@ class YtdlpDownloader:
             # If the cookie file is read-only (like in Render secrets), yt-dlp will crash on exit when trying to save cookies.
             # To prevent this, we copy the cookies to a temporary writeable path and pass that instead.
             try:
-                temp_cookie_path = os.path.join(self.root_dir, "temp_cookies.txt")
+                import tempfile
                 import shutil
+                temp_cookie_path = os.path.join(tempfile.gettempdir(), "temp_cookies.txt")
                 shutil.copy2(cookiefile_path, temp_cookie_path)
                 ydl_opts["cookiefile"] = temp_cookie_path
             except Exception:

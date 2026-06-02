@@ -266,7 +266,7 @@ def test_ytdlp(url: str):
             cookiefile_path = path
             break
             
-    cmd = ["yt-dlp", "--dump-json", "--no-playlist", "--nocheckcertificate"]
+    cmd = ["yt-dlp", "--dump-json", "--no-playlist", "--no-check-certificate"]
     cmd.extend(["--js-runtimes", "deno"])
     
     if cookiefile_path:

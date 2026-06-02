@@ -51,14 +51,16 @@ function showToast(message, isError = false) {
     }, 3500);
 }
 
-// Control styles and iframe loading for browser fallback downloader
+// Control styles and URL target configuration for alternative browser downloader
 function activateFallbackWidget(url) {
     const fallbackContainer = document.getElementById('fallback-downloader-container');
-    const fallbackIframe = document.getElementById('fallback-iframe');
+    const fallbackLink = document.getElementById('fallback-download-link');
     const downloadForm = document.getElementById('download-form');
     
-    // Load iframe target
-    fallbackIframe.src = `https://clickapi.net/api/widgetplus?url=${encodeURIComponent(url)}`;
+    // Set link href
+    if (fallbackLink) {
+        fallbackLink.href = `https://clickapi.net/api/widgetplus?url=${encodeURIComponent(url)}`;
+    }
     
     // Display fallback panel
     fallbackContainer.classList.remove('hidden');
@@ -70,18 +72,20 @@ function activateFallbackWidget(url) {
     // Update toggle button text/state
     const manualBtn = document.getElementById('btn-manual-fallback');
     if (manualBtn) {
-        manualBtn.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Close Browser Downloader`;
+        manualBtn.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Close Alternative Downloader`;
         manualBtn.classList.add('active');
     }
 }
 
 function deactivateFallbackWidget() {
     const fallbackContainer = document.getElementById('fallback-downloader-container');
-    const fallbackIframe = document.getElementById('fallback-iframe');
+    const fallbackLink = document.getElementById('fallback-download-link');
     const downloadForm = document.getElementById('download-form');
     
     fallbackContainer.classList.add('hidden');
-    fallbackIframe.src = '';
+    if (fallbackLink) {
+        fallbackLink.href = '#';
+    }
     
     downloadForm.querySelector('.form-row').classList.remove('hidden');
     document.getElementById('btn-download').classList.remove('hidden');

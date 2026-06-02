@@ -70,7 +70,8 @@ class YtdlpDownloader:
                 info = ydl.extract_info(url, download=False)
                 return info
             except Exception as e:
-                # Return None if extraction fails
+                import sys
+                print(f"ERROR: Failed extracting video details: {e}", file=sys.stderr)
                 return None
 
     def download_video(self, url: str, resolution: Optional[str] = None, outtmpl: Optional[str] = None) -> Dict[str, Any]:

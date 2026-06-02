@@ -40,6 +40,17 @@ class YtdlpDownloader:
             }
         }
 
+        # Check for secure cookies.txt files
+        cookies_paths = [
+            os.path.join(self.root_dir, "cookies.txt"),
+            "/etc/secrets/cookies.txt",
+            os.path.join(self.backend_dir, "cookies.txt")
+        ]
+        for path in cookies_paths:
+            if os.path.exists(path):
+                opts["cookiefile"] = path
+                break
+
         # Setup download archive if enabled
         if self.config.get("download_archive"):
             archive_file = self.config.get("archive_file", "downloaded_history.txt")
@@ -65,6 +76,18 @@ class YtdlpDownloader:
                 }
             }
         }
+        
+        # Check for secure cookies.txt files
+        cookies_paths = [
+            os.path.join(self.root_dir, "cookies.txt"),
+            "/etc/secrets/cookies.txt",
+            os.path.join(self.backend_dir, "cookies.txt")
+        ]
+        for path in cookies_paths:
+            if os.path.exists(path):
+                ydl_opts["cookiefile"] = path
+                break
+
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
                 info = ydl.extract_info(url, download=False)

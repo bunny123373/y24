@@ -1,6 +1,11 @@
 import os
 import sys
 
+# Inject Deno path to environment variables for Render compatibility
+for path in ["/opt/render/.deno/bin", os.path.expanduser("~/.deno/bin")]:
+    if os.path.exists(path):
+        os.environ["PATH"] = path + os.pathsep + os.environ.get("PATH", "")
+
 # Add backend directory to Python path to ensure clean imports when run from root
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

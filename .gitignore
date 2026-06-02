@@ -23,3 +23,6 @@ config.json
 # Logs
 *.log
 .system_generated/
+
+# Secret files
+cookies.txt

@@ -143,7 +143,7 @@ def format_duration(seconds):
 def display_banner():
     """Prints a beautiful title banner."""
     console.print(Panel.fit(
-        "[banner]▲ ANTIGRAVITY yt-dlp MEDIA DOWNLOADER ▲[/banner]\n"
+        "[banner]*** ANTIGRAVITY yt-dlp MEDIA DOWNLOADER ***[/banner]\n"
         "[dim]An elegant, high-performance CLI media downloader[/dim]",
         border_style="banner",
         padding=(1, 4)
@@ -309,10 +309,9 @@ def interactive_mode():
             console.print(f"[success]Starting video download...[/success]")
             with progress_tracker:
                 try:
-                    downloader.download_video(url, resolution=res)
-                    console.print("[success]✓ Download Completed successfully![/success]\n")
+                    console.print("[success][SUCCESS] Download Completed successfully![/success]\n")
                 except Exception as e:
-                    console.print(f"[error]✗ An error occurred: {e}[/error]\n")
+                    console.print(f"[error][ERROR] An error occurred: {e}[/error]\n")
 
         elif choice == "2":
             url = Prompt.ask("[accent]Enter Video URL[/accent]")
@@ -343,9 +342,9 @@ def interactive_mode():
             with progress_tracker:
                 try:
                     downloader.download_audio(url, audio_format=fmt, audio_quality=qual)
-                    console.print("[success]✓ Audio Download & Extraction Completed successfully![/success]\n")
+                    console.print("[success][SUCCESS] Audio Download & Extraction Completed successfully![/success]\n")
                 except Exception as e:
-                    console.print(f"[error]✗ An error occurred: {e}[/error]\n")
+                    console.print(f"[error][ERROR] An error occurred: {e}[/error]\n")
 
         elif choice == "3":
             url = Prompt.ask("[accent]Enter Playlist or Channel URL[/accent]")
@@ -367,7 +366,7 @@ def interactive_mode():
                 if confirm:
                     with progress_tracker:
                         downloader.download_video(url)
-                    console.print("[success]✓ Download Completed successfully![/success]\n")
+                    console.print("[success][SUCCESS] Download Completed successfully![/success]\n")
                 continue
 
             display_playlist_info(info)
@@ -391,9 +390,9 @@ def interactive_mode():
             with progress_tracker:
                 try:
                     downloader.download_playlist(url, is_audio=is_audio, start_idx=start_idx, end_idx=end_idx)
-                    console.print("[success]✓ Playlist Download Completed successfully![/success]\n")
+                    console.print("[success][SUCCESS] Playlist Download Completed successfully![/success]\n")
                 except Exception as e:
-                    console.print(f"[error]✗ An error occurred: {e}[/error]\n")
+                    console.print(f"[error][ERROR] An error occurred: {e}[/error]\n")
 
         elif choice == "4":
             edit_settings(current_config)
@@ -469,9 +468,9 @@ def run_cli_arguments():
                         resolution=res,
                         outtmpl=args.outtmpl
                     )
-        console.print("[success]✓ Completed successfully![/success]")
+        console.print("[success][SUCCESS] Completed successfully![/success]")
     except Exception as e:
-        console.print(f"[error]✗ Error during execution: {e}[/error]")
+        console.print(f"[error][ERROR] Error during execution: {e}[/error]")
         sys.exit(1)
 
 if __name__ == "__main__":

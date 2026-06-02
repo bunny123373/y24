@@ -33,6 +33,11 @@ class YtdlpDownloader:
             "logtostderr": False,
             "quiet": True,
             "no_warnings": True,
+            "extractor_args": {
+                "youtube": {
+                    "client": ["android", "ios"]
+                }
+            }
         }
 
         # Setup download archive if enabled
@@ -54,6 +59,11 @@ class YtdlpDownloader:
             "nocheckcertificate": True,
             "ignoreerrors": True,
             "quiet": True,
+            "extractor_args": {
+                "youtube": {
+                    "client": ["android", "ios"]
+                }
+            }
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:

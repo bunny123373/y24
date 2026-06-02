@@ -183,10 +183,35 @@ def download_worker(download_id: str, url: str, dl_type: str, quality: str):
 
 @app.get("/")
 def read_root():
-    """Welcome index pointing to auto-generated OpenAPI documentation."""
+    """Welcome index pointing to auto-generated OpenAPI documentation with Deno diagnostics."""
+    import subprocess
+    import shutil
+    
+    deno_in_path = shutil.which("deno")
+    deno_version = "Not available"
+    
+    if deno_in_path:
+        try:
+            deno_version = subprocess.check_output([deno_in_path, "--version"], stderr=subprocess.STDOUT).decode("utf-8")
+        except Exception as e:
+            deno_version = f"Error running deno: {e}"
+            
+    checked_paths = {}
+    for p in ["/opt/render/.deno/bin/deno", os.path.expanduser("~/.deno/bin/deno")]:
+        checked_paths[p] = os.path.exists(p)
+        if os.path.exists(p):
+            try:
+                checked_paths[p + "_exec"] = subprocess.check_output([p, "--version"], stderr=subprocess.STDOUT).decode("utf-8")
+            except Exception as e:
+                checked_paths[p + "_exec_error"] = str(e)
+
     return {
         "message": "Antigravity FastAPI Downloader Server active",
-        "docs_url": "/docs"
+        "docs_url": "/docs",
+        "deno_in_path": deno_in_path,
+        "deno_version": deno_version,
+        "checked_paths": checked_paths,
+        "PATH": os.environ.get("PATH", "")
     }
 
 @app.get("/api/info")

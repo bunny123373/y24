@@ -186,110 +186,11 @@ def download_worker(download_id: str, url: str, dl_type: str, quality: str):
 
 @app.get("/")
 def read_root():
-    """Welcome index pointing to auto-generated OpenAPI documentation with Deno and Cookie diagnostics."""
-    import subprocess
-    import shutil
-    
-    deno_in_path = shutil.which("deno")
-    deno_version = "Not available"
-    
-    if deno_in_path:
-        try:
-            deno_version = subprocess.check_output([deno_in_path, "--version"], stderr=subprocess.STDOUT).decode("utf-8")
-        except Exception as e:
-            deno_version = f"Error running deno: {e}"
-            
-    checked_paths = {}
-    relative_deno_bin = os.path.join(backend_dir, "deno_bin", "bin", "deno")
-    for p in [relative_deno_bin, "/opt/render/.deno/bin/deno", os.path.expanduser("~/.deno/bin/deno")]:
-        checked_paths[p] = os.path.exists(p)
-        if os.path.exists(p):
-            try:
-                checked_paths[p + "_exec"] = subprocess.check_output([p, "--version"], stderr=subprocess.STDOUT).decode("utf-8")
-            except Exception as e:
-                checked_paths[p + "_exec_error"] = str(e)
-
-    # Check cookies file
-    import tempfile
-    cookies_diag = {}
-    cookies_paths = [
-        "/opt/render/project/src/cookies.txt",
-        "/etc/secrets/cookies.txt",
-        os.path.join(backend_dir, "cookies.txt"),
-        os.path.join(tempfile.gettempdir(), "temp_cookies.txt")
-    ]
-    for path in cookies_paths:
-        exists = os.path.exists(path)
-        cookies_diag[path] = {
-            "exists": exists,
-            "size": os.path.getsize(path) if exists else 0
-        }
-        if exists:
-            try:
-                # Extract domain names present in cookies to check if they are the new ones
-                domains = set()
-                with open(path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if line.strip() and not line.startswith("#"):
-                            parts = line.split("\t")
-                            if parts:
-                                domains.add(parts[0])
-                cookies_diag[path]["domains"] = list(domains)[:10]  # limit to first 10 for safety
-            except Exception as e:
-                cookies_diag[path]["error"] = str(e)
-
+    """Welcome index pointing to auto-generated OpenAPI documentation."""
     return {
         "message": "Antigravity FastAPI Downloader Server active",
-        "docs_url": "/docs",
-        "deno_in_path": deno_in_path,
-        "deno_version": deno_version,
-        "checked_paths": checked_paths,
-        "cookies_diag": cookies_diag,
-        "PATH": os.environ.get("PATH", "")
+        "docs_url": "/docs"
     }
-
-@app.get("/api/test")
-def test_ytdlp(url: str):
-    """Diagnostic endpoint to capture raw yt-dlp stderr logs."""
-    import subprocess
-    import shutil
-    import tempfile
-    
-    cookiefile_path = None
-    cookies_paths = [
-        "/opt/render/project/src/cookies.txt",
-        "/etc/secrets/cookies.txt",
-        os.path.join(backend_dir, "cookies.txt")
-    ]
-    for path in cookies_paths:
-        if os.path.exists(path):
-            cookiefile_path = path
-            break
-            
-    cmd = ["yt-dlp", "--dump-json", "--no-playlist", "--no-check-certificate"]
-    cmd.extend(["--js-runtimes", "deno"])
-    
-    if cookiefile_path:
-        try:
-            temp_cookie_path = os.path.join(tempfile.gettempdir(), "temp_cookies_diag.txt")
-            shutil.copy2(cookiefile_path, temp_cookie_path)
-            cmd.extend(["--cookies", temp_cookie_path])
-        except Exception as e:
-            return {"error": f"Failed copying cookies: {e}"}
-            
-    cmd.append(url)
-    
-    try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        return {
-            "cmd": " ".join(cmd),
-            "returncode": res.returncode,
-            "stdout_len": len(res.stdout),
-            "stdout_snippet": res.stdout[:500],
-            "stderr": res.stderr
-        }
-    except Exception as e:
-        return {"error": str(e)}
 
 @app.get("/api/info")
 def get_video_info(url: str):

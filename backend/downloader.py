@@ -33,7 +33,7 @@ class YtdlpDownloader:
             "logtostderr": False,
             "quiet": True,
             "no_warnings": True,
-            "js_runtimes": {"node": {}},
+            "js_runtimes": {"deno": {}, "node": {}},
             "extractor_args": {
                 "youtube": {
                     "client": ["android", "ios"]
@@ -84,7 +84,7 @@ class YtdlpDownloader:
             "nocheckcertificate": True,
             "ignoreerrors": True,
             "quiet": True,
-            "js_runtimes": {"node": {}},
+            "js_runtimes": {"deno": {}, "node": {}},
             "extractor_args": {
                 "youtube": {
                     "client": ["android", "ios"]

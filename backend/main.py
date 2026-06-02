@@ -248,6 +248,49 @@ def read_root():
         "PATH": os.environ.get("PATH", "")
     }
 
+@app.get("/api/test")
+def test_ytdlp(url: str):
+    """Diagnostic endpoint to capture raw yt-dlp stderr logs."""
+    import subprocess
+    import shutil
+    import tempfile
+    
+    cookiefile_path = None
+    cookies_paths = [
+        "/opt/render/project/src/cookies.txt",
+        "/etc/secrets/cookies.txt",
+        os.path.join(backend_dir, "cookies.txt")
+    ]
+    for path in cookies_paths:
+        if os.path.exists(path):
+            cookiefile_path = path
+            break
+            
+    cmd = ["yt-dlp", "--dump-json", "--no-playlist", "--nocheckcertificate"]
+    cmd.extend(["--js-runtimes", "deno"])
+    
+    if cookiefile_path:
+        try:
+            temp_cookie_path = os.path.join(tempfile.gettempdir(), "temp_cookies_diag.txt")
+            shutil.copy2(cookiefile_path, temp_cookie_path)
+            cmd.extend(["--cookies", temp_cookie_path])
+        except Exception as e:
+            return {"error": f"Failed copying cookies: {e}"}
+            
+    cmd.append(url)
+    
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+        return {
+            "cmd": " ".join(cmd),
+            "returncode": res.returncode,
+            "stdout_len": len(res.stdout),
+            "stdout_snippet": res.stdout[:500],
+            "stderr": res.stderr
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/api/info")
 def get_video_info(url: str):
     """Fetches details and thumbnail of a video without downloading."""

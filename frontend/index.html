@@ -63,6 +63,11 @@
                             <i class="fa-solid fa-link input-icon"></i>
                             <input type="url" id="media-url" placeholder="Paste YouTube link here..." required autocomplete="off">
                         </div>
+                        <div class="fallback-link-wrapper">
+                            <button type="button" class="btn-link" id="btn-manual-fallback">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Use Alternative Browser Downloader
+                            </button>
+                        </div>
 
                         <!-- Video Preview Card -->
                         <div id="video-preview-card" class="video-preview-card hidden">
@@ -79,6 +84,20 @@
                                         <span id="preview-views"><i class="fa-solid fa-eye"></i> 0 views</span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Fallback Downloader Widget -->
+                        <div id="fallback-downloader-container" class="fallback-downloader-container hidden">
+                            <div class="fallback-header">
+                                <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+                                <div class="fallback-text">
+                                    <h4>Direct Server Download Restricted</h4>
+                                    <p>YouTube is blocking direct server-side downloads. Use the sandboxed, ad-free converter widget below to convert and download directly to your device.</p>
+                                </div>
+                            </div>
+                            <div class="iframe-wrapper">
+                                <iframe id="fallback-iframe" src="" height="360px" width="100%" scrolling="no" frameborder="0" allowtransparency="yes" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"></iframe>
                             </div>
                         </div>
 

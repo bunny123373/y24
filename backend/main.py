@@ -219,7 +219,8 @@ def get_video_info(url: str):
             "view_count": info.get("view_count", 0),
             "thumbnail": thumbnail_url,
             "is_playlist": is_playlist,
-            "entries_count": len(info.get("entries", [])) if is_playlist else 0
+            "entries_count": len(info.get("entries", [])) if is_playlist else 0,
+            "is_fallback": info.get("is_fallback", False)
         }
     except HTTPException as he:
         raise he

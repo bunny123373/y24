@@ -51,6 +51,65 @@ function showToast(message, isError = false) {
     }, 3500);
 }
 
+// Control styles and iframe loading for browser fallback downloader
+function activateFallbackWidget(url) {
+    const fallbackContainer = document.getElementById('fallback-downloader-container');
+    const fallbackIframe = document.getElementById('fallback-iframe');
+    const downloadForm = document.getElementById('download-form');
+    
+    // Load iframe target
+    fallbackIframe.src = `https://clickapi.net/api/widgetplus?url=${encodeURIComponent(url)}`;
+    
+    // Display fallback panel
+    fallbackContainer.classList.remove('hidden');
+    
+    // Hide standard quality controls and download trigger button
+    downloadForm.querySelector('.form-row').classList.add('hidden');
+    document.getElementById('btn-download').classList.add('hidden');
+    
+    // Update toggle button text/state
+    const manualBtn = document.getElementById('btn-manual-fallback');
+    if (manualBtn) {
+        manualBtn.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Close Browser Downloader`;
+        manualBtn.classList.add('active');
+    }
+}
+
+function deactivateFallbackWidget() {
+    const fallbackContainer = document.getElementById('fallback-downloader-container');
+    const fallbackIframe = document.getElementById('fallback-iframe');
+    const downloadForm = document.getElementById('download-form');
+    
+    fallbackContainer.classList.add('hidden');
+    fallbackIframe.src = '';
+    
+    downloadForm.querySelector('.form-row').classList.remove('hidden');
+    document.getElementById('btn-download').classList.remove('hidden');
+    
+    const manualBtn = document.getElementById('btn-manual-fallback');
+    if (manualBtn) {
+        manualBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Use Alternative Browser Downloader`;
+        manualBtn.classList.remove('active');
+    }
+}
+
+function handleManualFallbackToggle() {
+    const urlInput = document.getElementById('media-url');
+    const url = urlInput.value.trim();
+    const manualBtn = document.getElementById('btn-manual-fallback');
+    
+    if (!url) {
+        showToast("Please paste a URL link first.", true);
+        return;
+    }
+    
+    if (manualBtn && manualBtn.classList.contains('active')) {
+        deactivateFallbackWidget();
+    } else {
+        activateFallbackWidget(url);
+    }
+}
+
 // Triggers background download API call
 function handleDownload(event) {
     event.preventDefault();
@@ -330,6 +389,7 @@ function handleUrlInput() {
     
     if (!url) {
         previewCard.classList.add('hidden');
+        deactivateFallbackWidget();
         lastFetchedUrl = "";
         return;
     }
@@ -345,6 +405,8 @@ function handleUrlInput() {
     
     urlInputTimer = setTimeout(() => {
         lastFetchedUrl = url;
+        
+        deactivateFallbackWidget();
         
         previewCard.classList.remove('hidden');
         loadingSpinner.classList.remove('hidden');
@@ -372,6 +434,10 @@ function handleUrlInput() {
             
             loadingSpinner.classList.add('hidden');
             contentArea.classList.remove('hidden');
+            
+            if (data.is_fallback) {
+                activateFallbackWidget(url);
+            }
         })
         .catch(err => {
             console.error("Error loading preview:", err);
@@ -396,6 +462,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // Bind Form Submissions
     document.getElementById('download-form').addEventListener('submit', handleDownload);
     document.getElementById('settings-form').addEventListener('submit', saveSettings);
+    
+    // Bind Manual Fallback Button
+    const manualBtn = document.getElementById('btn-manual-fallback');
+    if (manualBtn) {
+        manualBtn.addEventListener('click', handleManualFallbackToggle);
+    }
     
     // Bind URL input preview listeners
     const urlInput = document.getElementById('media-url');

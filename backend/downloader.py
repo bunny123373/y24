@@ -1,6 +1,73 @@
 import os
 import yt_dlp
+import re
+import urllib.request
+import json
 from typing import Dict, Any, Callable, Optional, List
+
+def extract_youtube_id(url: str) -> Optional[str]:
+    """Helper to extract YouTube video ID from various URL formats."""
+    patterns = [
+        r'(?:v=|\/v\/|embed\/|youtu\.be\/|shorts\/|watch\?v=)([^#\&\?]+)'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
+
+def get_cdnframe_metadata(video_id: str) -> Optional[Dict[str, Any]]:
+    """Fetches video metadata fallback from api.cdnframe.com."""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://clickapi.net/',
+        'Origin': 'https://clickapi.net',
+        'Accept': 'application/json'
+    }
+    try:
+        # 1. Authenticate to get a token
+        auth_url = 'https://api.cdnframe.com/api/v5/auth'
+        auth_req = urllib.request.Request(auth_url, method='POST', headers=headers)
+        with urllib.request.urlopen(auth_req, timeout=5) as response:
+            auth_data = json.loads(response.read().decode('utf-8'))
+            token = auth_data.get('token')
+            if not token:
+                return None
+
+        # 2. Fetch video info metadata
+        info_url = f'https://api.cdnframe.com/api/v5/info/{video_id}'
+        info_headers = headers.copy()
+        info_headers['Authorization'] = f'Bearer {token}'
+        info_req = urllib.request.Request(info_url, method='GET', headers=info_headers)
+
+        with urllib.request.urlopen(info_req, timeout=5) as response:
+            info_data = json.loads(response.read().decode('utf-8'))
+            
+            # Map duration string "5:01" to seconds
+            duration_str = info_data.get('duration', '0')
+            duration_secs = 0
+            try:
+                parts = duration_str.split(':')
+                if len(parts) == 2:
+                    duration_secs = int(parts[0]) * 60 + int(parts[1])
+                elif len(parts) == 3:
+                    duration_secs = int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            except Exception:
+                pass
+
+            return {
+                "title": info_data.get("title", "Unknown Title"),
+                "uploader": "YouTube Downloader API (Fallback)",
+                "duration": duration_secs,
+                "view_count": 0,
+                "thumbnails": [{"url": f"https://i.ytimg.com/vi/{video_id}/maxresdefault.jpg"}],
+                "webpage_url": f"https://www.youtube.com/watch?v={video_id}",
+                "is_fallback": True
+            }
+    except Exception as e:
+        import sys
+        print(f"CDNFrame metadata fallback failed for {video_id}: {e}", file=sys.stderr)
+        return None
 
 class YtdlpDownloader:
     def __init__(self, config: Dict[str, Any], progress_hook: Optional[Callable[[Dict[str, Any]], None]] = None):
@@ -116,14 +183,25 @@ class YtdlpDownloader:
             except Exception:
                 ydl_opts["cookiefile"] = cookiefile_path
 
+        info = None
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
                 info = ydl.extract_info(url, download=False)
-                return info
             except Exception as e:
                 import sys
                 print(f"ERROR: Failed extracting video details: {e}", file=sys.stderr)
-                return None
+        
+        if info:
+            return info
+
+        # If yt-dlp metadata fetch failed, try CDNFrame API fallback
+        video_id = extract_youtube_id(url)
+        if video_id:
+            import sys
+            print(f"yt-dlp failed to fetch info for YouTube URL. Trying CDNFrame API fallback for {video_id}...", file=sys.stderr)
+            return get_cdnframe_metadata(video_id)
+            
+        return None
 
     def download_video(self, url: str, resolution: Optional[str] = None, outtmpl: Optional[str] = None) -> Dict[str, Any]:
         """Downloads a video with the configured/specified resolution."""

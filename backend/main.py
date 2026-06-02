@@ -2,12 +2,15 @@ import os
 import sys
 
 # Inject Deno path to environment variables for Render compatibility
-for path in ["/opt/render/.deno/bin", os.path.expanduser("~/.deno/bin")]:
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+relative_deno_path = os.path.join(backend_dir, "deno_bin", "bin")
+
+for path in [relative_deno_path, "/opt/render/.deno/bin", os.path.expanduser("~/.deno/bin")]:
     if os.path.exists(path):
         os.environ["PATH"] = path + os.pathsep + os.environ.get("PATH", "")
 
 # Add backend directory to Python path to ensure clean imports when run from root
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, backend_dir)
 
 import uuid
 import json
@@ -197,7 +200,8 @@ def read_root():
             deno_version = f"Error running deno: {e}"
             
     checked_paths = {}
-    for p in ["/opt/render/.deno/bin/deno", os.path.expanduser("~/.deno/bin/deno")]:
+    relative_deno_bin = os.path.join(backend_dir, "deno_bin", "bin", "deno")
+    for p in [relative_deno_bin, "/opt/render/.deno/bin/deno", os.path.expanduser("~/.deno/bin/deno")]:
         checked_paths[p] = os.path.exists(p)
         if os.path.exists(p):
             try:

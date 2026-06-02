@@ -1,0 +1,25 @@
+# Python Virtual Environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Node Modules
+node_modules/
+frontend/node_modules/
+
+# Local media downloads and metadata cache
+downloads/
+*.part
+*.mkv
+*.mp4
+*.mp3
+*.webm
+downloaded_history.txt
+
+# Local configurations
+config.json
+
+# Logs
+*.log
+.system_generated/

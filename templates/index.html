@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Media Downloader</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="glow-bg">
+        <div class="glow-sphere glow-1"></div>
+        <div class="glow-sphere glow-2"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i class="fa-solid fa-cloud-arrow-down logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Antigravity</h1>
+                    <span>yt-dlp manager</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" id="nav-btn-download" onclick="switchTab('download')">
+                    <i class="fa-solid fa-circle-down"></i> Download
+                </button>
+                <button class="nav-btn" id="nav-btn-history" onclick="switchTab('history')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                </button>
+                <button class="nav-btn" id="nav-btn-settings" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-sliders"></i> Settings
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <p>Localhost Server active</p>
+                <span class="pulse-indicator"></span>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- DOWNLOAD PANEL -->
+            <section class="tab-panel active" id="panel-download">
+                <header class="panel-header">
+                    <h2>Media Downloader</h2>
+                    <p>Enter any video or playlist URL below to get started.</p>
+                </header>
+
+                <div class="download-card glass">
+                    <form id="download-form" onsubmit="handleDownload(event)">
+                        <div class="input-group">
+                            <i class="fa-solid fa-link input-icon"></i>
+                            <input type="url" id="media-url" placeholder="Paste YouTube link here..." required autocomplete="off">
+                        </div>
+
+                        <!-- Video Preview Card -->
+                        <div id="video-preview-card" class="video-preview-card hidden">
+                            <div class="preview-loading" id="preview-loading-spinner">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading video preview...
+                            </div>
+                            <div class="preview-content" id="preview-content-area">
+                                <img id="preview-thumbnail" src="" alt="Video Thumbnail">
+                                <div class="preview-info">
+                                    <h4 id="preview-title">Video Title</h4>
+                                    <p id="preview-channel"><i class="fa-solid fa-user"></i> Channel</p>
+                                    <div class="preview-meta">
+                                        <span id="preview-duration"><i class="fa-solid fa-clock"></i> 00:00</span>
+                                        <span id="preview-views"><i class="fa-solid fa-eye"></i> 0 views</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="control-group">
+                                <label for="media-type">Download Type</label>
+                                <div class="select-wrapper">
+                                    <select id="media-type" onchange="toggleQualityOptions()">
+                                        <option value="video" selected>Video (.mkv / .mp4)</option>
+                                        <option value="audio">Audio Extraction</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+
+                            <div class="control-group" id="video-quality-group">
+                                <label for="video-quality">Max Quality</label>
+                                <div class="select-wrapper">
+                                    <select id="video-quality">
+                                        <option value="best" selected>Best Quality</option>
+                                        <option value="1080p">1080p Full HD</option>
+                                        <option value="720p">720p HD</option>
+                                        <option value="480p">480p SD</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+
+                            <div class="control-group hidden" id="audio-quality-group">
+                                <label for="audio-quality">Audio Format</label>
+                                <div class="select-wrapper">
+                                    <select id="audio-quality">
+                                        <option value="mp3" selected>MP3 (Standard)</option>
+                                        <option value="m4a">M4A (High Compatibility)</option>
+                                        <option value="flac">FLAC (Lossless)</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="btn-download">
+                            <i class="fa-solid fa-circle-arrow-down"></i> Start Download
+                        </button>
+                    </form>
+                </div>
+
+                <div class="active-downloads-section">
+                    <h3>Active Downloads <span id="active-count" class="badge">0</span></h3>
+                    <div id="downloads-container" class="downloads-list">
+                        <!-- Dynamic active download item cards will go here -->
+                        <div class="empty-state" id="empty-active-state">
+                            <i class="fa-solid fa-hourglass-empty"></i>
+                            <p>No active downloads. Paste a URL above to start!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTORY PANEL -->
+            <section class="tab-panel" id="panel-history">
+                <header class="panel-header">
+                    <h2>Download History</h2>
+                    <p>Access your local downloads directory files.</p>
+                </header>
+
+                <div class="history-list glass">
+                    <div class="history-header">
+                        <span class="col-name">File Name</span>
+                        <span class="col-size">Size</span>
+                        <span class="col-date">Date Completed</span>
+                    </div>
+                    <div id="history-container">
+                        <!-- Dynamic completed list items -->
+                    </div>
+                    <div class="empty-state hidden" id="empty-history-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <p>No files found in your downloads folder.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SETTINGS PANEL -->
+            <section class="tab-panel" id="panel-settings">
+                <header class="panel-header">
+                    <h2>Configuration Settings</h2>
+                    <p>Customize folder targets and format parameters.</p>
+                </header>
+
+                <div class="settings-card glass">
+                    <form id="settings-form" onsubmit="saveSettings(event)">
+                        <div class="control-group">
+                            <label for="settings-download-dir">Download Directory</label>
+                            <div class="input-group">
+                                <i class="fa-solid fa-folder input-icon"></i>
+                                <input type="text" id="settings-download-dir" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="control-group">
+                                <label for="settings-video-quality">Default Video Resolution</label>
+                                <div class="select-wrapper">
+                                    <select id="settings-video-quality">
+                                        <option value="best">Best Quality</option>
+                                        <option value="1080p">1080p Full HD</option>
+                                        <option value="720p">720p HD</option>
+                                        <option value="480p">480p SD</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label for="settings-audio-format">Default Audio Extraction Format</label>
+                                <div class="select-wrapper">
+                                    <select id="settings-audio-format">
+                                        <option value="mp3">MP3</option>
+                                        <option value="m4a">M4A</option>
+                                        <option value="flac">FLAC</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="settings-embed-metadata">
+                                <span class="checkmark"></span>
+                                Embed tags and album art metadata into files
+                            </label>
+
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="settings-embed-thumbnail">
+                                <span class="checkmark"></span>
+                                Embed video cover thumbnail
+                            </label>
+
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="settings-download-archive">
+                                <span class="checkmark"></span>
+                                Prevent downloading duplicates (History Archive)
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <i id="toast-icon" class="fa-solid fa-circle-check"></i>
+        <span id="toast-message">Configuration saved successfully!</span>
+    </div>
+
+    <!-- JavaScript File -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
